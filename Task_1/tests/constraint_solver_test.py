@@ -1,4 +1,6 @@
-
+import sys
+# to avoid editing your PYTHONPATH
+sys.path.append("../src/")
 from Utilities import  ConstraintSolver
 import pandas as pd
 

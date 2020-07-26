@@ -1,5 +1,5 @@
-cd Task_1/src
+cd Task_1/tests
 pytest
 cd ../../
-cd Task_2/src
+cd Task_2/tests
 pytest
