@@ -1,11 +1,12 @@
 from Utilities import GenomeParser
 import pandas as pd
+import sys
 
-
-def main():
-
-    original_regions = GenomeParser.read_genome_dataframe(
-        "../../Data/Regions_Big.txt")
+def main(path=None):
+    if path == None:
+        path = "../../Data/Regions_Big.txt"
+    
+    original_regions = GenomeParser.read_genome_dataframe(path)
     segment_dictionary = create_segment_dict(original_regions)
     segment_dictionary = add_count_to_segment_dict(segment_dictionary,
                                                    original_regions)
@@ -64,4 +65,7 @@ def create_segment_lines(segment_dictionary: dict) -> list:
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1:
+        main(sys.argv[1])
+    else:
+        main()

@@ -1,6 +1,7 @@
 from Utilities import GenomeUtilities, GenomeParser, ConstraintSolver
 from constraint import *
 import pandas as pd
+import sys
 
 
 def write_solution(path: str, final_solution: dict,
@@ -16,10 +17,10 @@ def write_solution(path: str, final_solution: dict,
                 '\n')
 
 
-def main():
-
-    original_regions = GenomeParser.read_genome_dataframe(
-        "../../Data/Regions_Big.txt")
+def main(path=None):
+    if path == None:
+        path = "../../Data/Regions_Big.txt"
+    original_regions = GenomeParser.read_genome_dataframe(path)
 
     constraints_dataframe = GenomeUtilities.generate_constraint_graph(
         original_regions)
@@ -45,4 +46,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1:
+        main(sys.argv[1])
+    else:
+        main()
