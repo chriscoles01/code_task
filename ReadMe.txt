@@ -6,8 +6,7 @@ Task 1:
     This allowed me to easily approach the problem with an efficient way of managing the overlap constraint
     Realising that this problem is O(n!) time complexity, I decided to create a heuristic before runnning a constraint problem solver
     I used the python package python-constraint with MinConflicts as a solver for the constraint problem
-    I used a divide and conquer method to try to reduce the amount of time it takes to find the lowest number of rows
-
+    todo: improve speed of constraint solver with a divide and conquer technique
 Task 2:
     I generated a dictionary of all possible start and end points for the segments
     I then used a dataframe to find which regions would lie in these segments, the total count being the number of overlaps
