@@ -28,3 +28,23 @@ class GenomeUtilities:
             return 1
         else:
             return 0
+
+    @staticmethod
+    def GenerateConstraintGraphFast(genome_DataFrame : pd.DataFrame) -> pd.DataFrame:
+        left = genome_DataFrame
+        right = genome_DataFrame.copy()
+        left['index'] = left.index
+        right['index'] = right.index
+        merged = left.assign(key=1).merge(right.assign(key=1), on='key').drop('key', 1)
+        conflict_DataFrame = pd.DataFrame(index=genome_DataFrame.index, columns=genome_DataFrame.index)
+        merged.apply(lambda row: GenomeUtilities.CheckConstraint(row, conflict_DataFrame), axis=1)
+        return conflict_DataFrame
+
+    @staticmethod
+    def CheckConstraint(row, conflict_DataFrame):
+        if (row.end_x < row.start_y):
+            conflict_DataFrame.loc[row.index_x, row.index_y] = 1
+        elif (row.start_x > row.end_y):
+           conflict_DataFrame.loc[row.index_x, row.index_y] = 1
+        else:
+           conflict_DataFrame.loc[row.index_x, row.index_y] = 0
