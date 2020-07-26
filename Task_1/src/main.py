@@ -15,9 +15,9 @@ def write_solution(path: str, final_solution:dict, original_regions:pd.DataFrame
 
 def main():
 
-    original_regions = GenomeParser.ToGenomeDataFrame("../../Data/Regions_Medium.txt")
-    constraints_dataframe = GenomeUtilities.GenerateConstraintGraphFast(original_regions)
-    # constraints_dataframe = pd.read_csv('bigboi.csv', index_col=0)
+    original_regions = GenomeParser.read_genome_dataframe("../../Data/Regions_Big.txt")
+
+    constraints_dataframe = GenomeUtilities.generate_constraint_graph(original_regions)
 
     order = constraints_dataframe.groupby(['index_x'])['constraint'].sum().sort_values(ascending=False)
 
@@ -27,20 +27,13 @@ def main():
 
     heuristic_solution = ConstraintSolver.generate_heuristic(constraints_dataframe, order)
 
-    print(heuristic_solution)
-
-
     final_solution = None
+    
     i = max(list(heuristic_solution.keys()))
 
     final_solution = ConstraintSolver.get_solution(for_solver_order.index, for_solver, i)
 
     write_solution('../Output/solution.txt', final_solution, original_regions)
-
-
-
-
-
 
 
 if __name__ == "__main__":
