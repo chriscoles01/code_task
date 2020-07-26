@@ -39,10 +39,7 @@ class ConstraintSolver:
                 count += 1
                 heuristic_solution[count] = []
 
-            constraints_dataframe, 
-            order_dataframe, 
-            matches, 
-            heuristic_solution[count] = ConstraintSolver._add_next_region_to_row(constraints_dataframe, 
+            constraints_dataframe, order_dataframe, matches, heuristic_solution[count] = ConstraintSolver._add_next_region_to_row(constraints_dataframe, 
                                                         order_dataframe, 
                                                         heuristic_solution[count])
         print("generated heuristic solution with", len(heuristic_solution.keys()), "groups")

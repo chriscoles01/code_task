@@ -14,7 +14,7 @@ class GenomeUtilities:
                 compatible = GenomeUtilities.IsConflicted(region_1, region_2)
 
                 conflict_DataFrame[region_id_1][region_id_2] = compatible
-        conflict_DataFrame.to_csv('bigboi.csv')
+
         return conflict_DataFrame
 
     @staticmethod   
@@ -30,6 +30,8 @@ class GenomeUtilities:
 
     @staticmethod
     def GenerateConstraintGraphFast(genome_DataFrame : pd.DataFrame) -> pd.DataFrame:
+        print("Generating constraint graph")
+
         left = genome_DataFrame
         right = genome_DataFrame.copy()
         left['index'] = left.index
@@ -37,13 +39,9 @@ class GenomeUtilities:
         merged = left.assign(key=1).merge(right.assign(key=1), on='key').drop('key', 1)
         
         # conflict_DataFrame = pd.DataFrame(index=genome_DataFrame.index, columns=genome_DataFrame.index)
-        start = time.perf_counter()
-        print("started")
         # merged.apply(lambda row: GenomeUtilities.CheckConstraint(row, conflict_DataFrame), axis=1)
         merged['constraint'] = merged.apply(lambda row: GenomeUtilities.CheckConstraintOld(row), axis=1)
-        print("ended")
-        end = time.perf_counter()
-        print(end-start)
+
         merged.to_csv('bigboi.csv')
         return merged
 
