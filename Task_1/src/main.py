@@ -1,60 +1,55 @@
 
-from genome_utlities import GenomeUtilities
-from genome_parser import GenomeParser
+from Utilities import GenomeUtilities,GenomeParser, get_solution
 from constraint import *
 import pandas as pd
-import time
 
 
 def main():
-    pass
 
-original_regions = GenomeParser.ToGenomeDataFrame("./Data/Regions_Big.txt")
-cons = GenomeUtilities.GenerateConstraintGraphFast(original_regions)
-# cons = pd.read_csv('bigboi.csv', index_col=0)
-for_solver = cons.copy()
-order = cons.groupby(['index_x'])['constraint'].sum().sort_values(ascending=False)
-for_solver_order = order.copy()
-levels={}
-count = 0
+    original_regions = GenomeParser.ToGenomeDataFrame("./Data/Regions_Big.txt")
+    constraints_dataframe = GenomeUtilities.GenerateConstraintGraphFast(original_regions)
+    # constraints_dataframe = pd.read_csv('bigboi.csv', index_col=0)
+    for_solver = constraints_dataframe.copy()
 
-start = time.perf_counter()
-matches= False
-while order.empty == False:
-    if matches == False:
-        count += 1
-        levels[count] = []
+    order = constraints_dataframe.groupby(['index_x'])['constraint'].sum().sort_values(ascending=False)
 
-    cons, order, matches, levels[count] = get_next_faster(cons,order,levels[count])
+    for_solver_order = order.copy()
+
+    heuristic_solution = generate_heuristic(constraints_dataframe, order)
+
+    print(heuristic_solution)
 
 
-end = time.perf_counter()
-print(end-start)
-print(levels)
+    final_solution = None
+    i = max(list(heuristic_solution.keys()))
+
+    final_solution = get_solution(for_solver_order.index, for_solver, i)
+
+    write_solution('./Output/solution.txt', final_solution, original_regions)
 
 
-final_solution = None
-i = max(list(levels.keys()))
-while True:
-    problem = Problem(MinConflictsSolver())
-    problem.addVariables(list(for_solver_order.index), range(1,i))
 
-    for_solver[for_solver.constraint == 0].apply(lambda row: problem.addConstraint(lambda row1, row2: row1 != row2, (row['index_x'], row['index_y'])),axis=1)
+def generate_heuristic(constraints_dataframe :pd.DataFrame, order_dataframe : pd.DataFrame):
+    heuristic_solution={}
+    count=0
+    matches= False
 
-    print("before solution")
-    solutions = problem.getSolution()
-    print("after solution", i-1)
+    while order_dataframe.empty == False:
+        if matches == False:
+            count += 1
+            heuristic_solution[count] = []
 
-    if solutions is not None:
-        i -=1
-        final_solution = solutions
-    if solutions == None:
-        break
-original_regions['row'] = 0
+        constraints_dataframe, 
+        order_dataframe, 
+        matches, 
+        heuristic_solution[count] = add_next_region_to_row(constraints_dataframe, 
+                                                    order_dataframe, 
+                                                    heuristic_solution[count])
 
+    return heuristic_solution
 
-print(final_solution)
-if final_solution is not None:
+def write_solution(path: string, final_solution:dict, original_regions:pd.DataFrame):
+    original_regions['row'] = 0
     with open('solution.txt', 'a+') as the_file:
         for region,row in final_solution.items():
             region_start = original_regions.loc[region].start
@@ -64,13 +59,15 @@ if final_solution is not None:
 
 
 
-def get_next_faster(df, order, existing):
+def add_next_region_to_row(df : pd.DataFrame, order : pd.DataFrame, existing:list):
     top_series = order.index[0]
 
     df_top_series = df[df.index_x == top_series]
+
     df_top_series = df_top_series[df_top_series.index_y != top_series]
 
     matches = False
+
     set_existing_check =set(df_top_series[df.index_y.isin(existing)].constraint.tolist())
 
     if  set_existing_check== {1} or set_existing_check==set():
