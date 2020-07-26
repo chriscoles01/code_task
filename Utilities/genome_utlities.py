@@ -1,5 +1,5 @@
 import pandas as pd
-
+import time
 class GenomeUtilities:
 
     @staticmethod
@@ -8,14 +8,13 @@ class GenomeUtilities:
         for region_id_1 in genome_DataFrame.index:
             # conflict_DataFrame[region_id_1] = genome_DataFrame.apply(lambda row: GenomeUtilities.IsConflicted(row, genome_DataFrame.loc[region_id_1]), axis=1)
             for region_id_2 in genome_DataFrame.index:
-                print(region_id_1, region_id_2)
                 region_1 = genome_DataFrame.loc[region_id_1]
                 region_2 = genome_DataFrame.loc[region_id_2]
                 
                 compatible = GenomeUtilities.IsConflicted(region_1, region_2)
 
                 conflict_DataFrame[region_id_1][region_id_2] = compatible
-        conflict_DataFrame.to_csv('oneofourtwo.csv')
+        conflict_DataFrame.to_csv('bigboi.csv')
         return conflict_DataFrame
 
     @staticmethod   
@@ -36,9 +35,28 @@ class GenomeUtilities:
         left['index'] = left.index
         right['index'] = right.index
         merged = left.assign(key=1).merge(right.assign(key=1), on='key').drop('key', 1)
-        conflict_DataFrame = pd.DataFrame(index=genome_DataFrame.index, columns=genome_DataFrame.index)
-        merged.apply(lambda row: GenomeUtilities.CheckConstraint(row, conflict_DataFrame), axis=1)
-        return conflict_DataFrame
+        
+        # conflict_DataFrame = pd.DataFrame(index=genome_DataFrame.index, columns=genome_DataFrame.index)
+        start = time.perf_counter()
+        print("started")
+        # merged.apply(lambda row: GenomeUtilities.CheckConstraint(row, conflict_DataFrame), axis=1)
+        merged['constraint'] = merged.apply(lambda row: GenomeUtilities.CheckConstraintOld(row), axis=1)
+        print("ended")
+        end = time.perf_counter()
+        print(end-start)
+        merged.to_csv('bigboi.csv')
+        return merged
+
+    @staticmethod
+    def CheckConstraintOld(row):
+        if row.index_x == row.index_y:
+            return 1
+        if (row.end_x < row.start_y):
+            return 1
+        elif (row.start_x > row.end_y):
+           return 1
+        else:
+           return 0
 
     @staticmethod
     def CheckConstraint(row, conflict_DataFrame):
